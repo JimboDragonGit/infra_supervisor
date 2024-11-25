@@ -7,7 +7,7 @@ provides :infra_userdata
 default_action :cycle
 
 property :secret, String, default: UnixCrypt::SHA512.build(SecureRandom.base64(12))
-property :secretname, String, default: ''
+property :secretname, String, name_property: true
 property :userdata, Hash, default: {}
 property :owner, String, default: ''
 
