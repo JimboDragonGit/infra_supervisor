@@ -61,6 +61,20 @@ action :recycle do
   action_cycle
 end
 
+action :cycle do
+  action_begin
+  action_download
+  action_verify
+  action_clean
+  action_unpack
+  action_prepare
+  action_build
+  action_check
+  action_install
+  action_strip
+  action_end
+end
+
 action_class do
   def secret
     new_resource.secret

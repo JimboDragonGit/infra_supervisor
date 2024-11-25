@@ -1,7 +1,21 @@
 #
 require 'fileutils'
 require 'chef-raketasks'
-require 'git-version-bump/rake-tasks'
+require 'git-version-bump'
+# require 'git-version-bump/rake-tasks'
+
+def current_version
+  cookbook_metadata = File.read('metadata.rb').lines.select {|line| line.match?(/version '(.).(.).(.)'/) }
+  Gem::Version.create(cookbook_metadata.first.split('\'')[1])
+end
+
+def bump_metadata(next_version)
+  cookbook_metadata = File.read('metadata.rb')
+  new_content = cookbook_metadata.gsub(current_version.version, next_version.version)
+
+  File.open('metadata.rb', 'w') { |file| file.write(new_content) }
+  GVB.tag_version(next_version)
+end
 
 task default: %i(
   begin_structure
@@ -23,13 +37,8 @@ end
 task begin_structure: %i() do
   default_variable = "\nCeci est le plan de commencement\n\n"
   puts default_variable
-
-  cookbook_metadata = File.read('metadata.rb').lines.select {|line| line.match?(/version '(.).(.).(.)'/) }
-  current_version = Gem::Version.create(cookbook_metadata.first.split('\'')[1])
   
-  puts "cookbook_metadata = #{current_version}"
-
-  GVB.tag_version(current_version)
+  puts "cookbook_version = #{current_version}"
 end
 
 task download_structure: %i() do
@@ -57,12 +66,13 @@ task prepare_structure: %i(release:chefserver) do
   default_variable = "\nCeci est le plan de préparation\n\n"
   puts default_variable
 
-  cookbook_metadata = File.read('metadata.rb')
+  version = current_version.version.split('.')
+  major_version = version[0]
+  minor_version = version[1]
+  patch_version = version[2]
 
-  next_version = Gem::Version.create("#{GVB.major_version}.#{GVB.minor_version}.#{GVB.patch_version + 1}")
-  new_content = cookbook_metadata.gsub(GVB.version, next_version)
-
-  File.open('metadata.rb', 'w') { |file| file.write(new_content) }
+  next_version = Gem::Version.create("#{major_version}.#{minor_version}.#{patch_version.to_i + 1}")
+  bump_metadata(next_version)
 end
 
 task build_structure: %i(package:policyfile:install package:policyfile:pack) do
@@ -90,6 +100,9 @@ end
 task end_structure: %i(release:supermarket) do
   default_variable = "\nCeci est le plan de closure\n\n"
   puts default_variable
+  
+  next_version = current_version.bump
+  bump_metadata(Gem::Version.create("#{next_version}.0"))
 end
 
 task :inspecting do
