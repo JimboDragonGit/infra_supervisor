@@ -1,0 +1,89 @@
+#
+require 'fileutils'
+require 'chef-raketasks'
+
+task default: %i(
+  begin_structure
+  download_structure
+  verify_structure
+  clean_structure
+  unpack_structure
+  prepare_structure
+  build_structure
+  check_structure
+  install_structure
+  strip_structure
+  end_structure
+) do
+  default_variable = "\nThis was the default plan\n\n"
+  puts default_variable
+end
+
+task begin_structure: %i() do
+  default_variable = "\nCeci est le plan de commencement\n\n"
+  puts default_variable
+end
+
+task download_structure: %i() do
+  default_variable = "\nCeci est le plan de téléchargement\n\n"
+  puts default_variable
+end
+
+task verify_structure: %i() do
+  default_variable = "\nCeci est le plan de vérification\n\n"
+  puts default_variable
+end
+
+task clean_structure: %i(clean) do
+  default_variable = "\nCeci est le plan de nettoyage\n\n"
+  puts default_variable
+  FileUtils.rm_rf('vendor')
+end
+
+task unpack_structure: %i(package:cookbook package:inspec) do
+  default_variable = "\nCeci est le plan de décompression\n\n"
+  puts default_variable
+end
+
+task prepare_structure: %i(release:chefserver) do
+  default_variable = "\nCeci est le plan de préparation\n\n"
+  puts default_variable
+end
+
+task build_structure: %i(package:policyfile:install package:policyfile:pack) do
+  default_variable = "\nCeci est le plan de construction\n\n"
+  puts default_variable
+end
+
+task :check_structure do #check_structure: %i(test:integration:static) do
+  default_variable = "\nCeci est le plan de controle\n\n"
+  puts default_variable
+end
+
+task install_structure: %i(package:policyfile:update) do
+  default_variable = "\nCeci est le plan de l'installation\n\n"
+  puts default_variable
+  system("chef push builder_unix")
+  system("chef push builder_windows")
+end
+
+task strip_structure: %i() do
+  default_variable = "\nCeci est le plan de finition\n\n"
+  puts default_variable
+end
+
+task end_structure: %i(release:supermarket) do
+  default_variable = "\nCeci est le plan de closure\n\n"
+  puts default_variable
+end
+
+task :inspecting do
+  system('inspec exec compliance/profiles/physical')
+end
+
+namespace :integration do
+  task physical: %i(inspecting) do
+    puts('chef-client')
+    # system('chef-client')
+  end
+end
