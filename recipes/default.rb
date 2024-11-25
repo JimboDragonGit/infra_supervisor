@@ -4,4 +4,6 @@
 #
 # Copyright:: 2023, The Authors, All Rights Reserved.
 
-infra_user 'bootstrppeur'
+infra_userdata node[cookbook_name]['bootstrappeur'] do
+  action :install
+end

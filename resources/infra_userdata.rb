@@ -13,47 +13,51 @@ property :owner, String, default: ''
 
 unified_mode true
 
-action :delete do
-  own_data_bag_item('secret', {secret: new_resource.secret}, :delete)
-  user_databag(delete)
-  own_data_bag(:delete)
+action :begin do
+  own_data(:prepare)
+  set_chef_user
+end
+
+action :download do
+  own_data_bag(:build)
+  own_data_bag_item('secret', {secret: new_resource.secret}, :create)
+end
+
+action :verify do
+end
+
+action :clean do
+end
+
+action :unpack do
 end
 
 action :prepare do
-  own_data_bag(:create)
-  own_data_bag_item('secret', {secret: new_resource.secret}, :create)
-  user_databag(:create)
-end
-
-action :install do
 end
 
 action :build do
   user_databag(:create)
 end
 
-action :clean do
-  action_delete
+action :check do
 end
 
-action :release do
+action :install do
+  own_data_bag_item('secret', {secret: new_resource.secret}, :create)
+  user_databag(:install)
 end
 
-action :test do
-
+action :strip do
 end
 
-action :cycle do
-  # action_clean
-  action_prepare
-  action_build
-  action_install
-  # action_test
-  # action_release
+action :end do
+  own_data_bag_item('secret', {secret: new_resource.secret}, :delete)
+  user_databag(delete)
+  own_data_bag(:delete)
 end
 
 action :recycle do
-  action_delete
+  action_end
   action_cycle
 end
 
@@ -96,15 +100,19 @@ action_class do
 
   def user_databag(action = :create)
     Chef::Log.warn("Encrypt user data bag of #{new_resource.name} with key #{new_resource.secret}")
-    chef_data_bag_item 'user_data' do
-      complete false
-      data_bag new_resource.name
-      encryption_version Chef::Config[:data_bag_encrypt_version].nil? ? 3 : Chef::Config[:data_bag_encrypt_version]
-      secret new_resource.secret
-      encrypt true
-      old_secret infra_secret
-      raw_data user_raw_data
-      action action
+    begin
+      chef_data_bag_item 'user_data' do
+        complete false
+        data_bag new_resource.name
+        encryption_version Chef::Config[:data_bag_encrypt_version].nil? ? 3 : Chef::Config[:data_bag_encrypt_version]
+        secret new_resource.secret
+        encrypt true
+        old_secret infra_secret
+        raw_data user_raw_data
+        action action
+      end
+    rescue Net::HTTPServerException => e
+      Chef::Log.warn("Is a 403 error? #{e}")
     end
   end
 end

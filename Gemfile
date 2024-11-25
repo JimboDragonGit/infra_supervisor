@@ -1,0 +1,2 @@
+
+gem 'git-version-bump'

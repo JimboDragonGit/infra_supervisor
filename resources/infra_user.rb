@@ -15,46 +15,67 @@ action :delete do
   infra_chefuser(:delete)
 end
 
-action :prepare do
-  # extend YP::ChefUser
-  # extend YP::Databags
-  # infra_userdata 'YP' do
-  #   userdata userdata
-  #   secret secret
-  #   action :prepare
-  # end
-  own_data(:prepare)
+action :begin do
+  own_data(:build)
   set_chef_user
 end
 
-action :install do
-  infra_chefuser
+action :download do
+end
+
+action :verify do
+end
+
+action :clean do
+end
+
+action :unpack do
+end
+
+action :prepare do
 end
 
 action :build do
   infra_chefuser
 end
 
-action :clean do
-  infra_chefuser(:delete)
+action :check do
 end
 
-action :release do
+action :install do
   infra_chefuser
 end
 
-action :cycle do
-  # action_clean
-  action_prepare
-  action_build
-  action_install
-  # action_test
-  # action_release
+action :strip do
+end
+
+action :end do
+  infra_chefuser(:delete)
 end
 
 action :recycle do
   action_delete
   action_cycle
+end
+
+action :cycle do
+  # action_clean
+  # action_prepare
+  # action_build
+  # action_install
+  # action_test
+  # action_release
+  action_begin
+  action_download
+  action_verify
+  action_clean
+  action_unpack
+  action_prepare
+  action_build
+  action_check
+  action_install
+  action_strip
+  action_end
 end
 
 action_class do

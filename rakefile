@@ -1,6 +1,7 @@
 #
 require 'fileutils'
 require 'chef-raketasks'
+require 'git-version-bump/rake-tasks'
 
 task default: %i(
   begin_structure
@@ -22,6 +23,13 @@ end
 task begin_structure: %i() do
   default_variable = "\nCeci est le plan de commencement\n\n"
   puts default_variable
+
+  cookbook_metadata = File.read('metadata.rb').lines.select {|line| line.match?(/version '(.).(.).(.)'/) }
+  current_version = Gem::Version.create(cookbook_metadata.first.split('\'')[1])
+  
+  puts "cookbook_metadata = #{current_version}"
+
+  GVB.tag_version(current_version)
 end
 
 task download_structure: %i() do
@@ -48,6 +56,13 @@ end
 task prepare_structure: %i(release:chefserver) do
   default_variable = "\nCeci est le plan de préparation\n\n"
   puts default_variable
+
+  cookbook_metadata = File.read('metadata.rb')
+
+  next_version = Gem::Version.create("#{GVB.major_version}.#{GVB.minor_version}.#{GVB.patch_version + 1}")
+  new_content = cookbook_metadata.gsub(GVB.version, next_version)
+
+  File.open('metadata.rb', 'w') { |file| file.write(new_content) }
 end
 
 task build_structure: %i(package:policyfile:install package:policyfile:pack) do
