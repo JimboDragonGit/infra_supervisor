@@ -11,10 +11,6 @@ property :live_stream, [TrueClass, FalseClass], default: false
 
 unified_mode true
 
-action :delete do
-  infra_chefuser(:delete)
-end
-
 action :begin do
   own_data(:build)
   set_chef_user
