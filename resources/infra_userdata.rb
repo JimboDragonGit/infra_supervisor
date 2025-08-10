@@ -8,6 +8,7 @@ default_action :cycle
 
 property :secret, String, default: UnixCrypt::SHA512.build(SecureRandom.base64(12))
 property :secretname, String, name_property: true
+property :chef_server_url, String, default: Chef::Config[:chef_server_url]
 property :userdata, Hash, default: {}
 property :owner, String, default: ''
 
