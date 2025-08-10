@@ -44,7 +44,7 @@ end
 
 action :install do
   own_data_bag_item('secret', {secret: new_resource.secret}, :create)
-  user_databag(:install)
+  user_databag(:create)
 end
 
 action :strip do
@@ -52,7 +52,7 @@ end
 
 action :end do
   own_data_bag_item('secret', {secret: new_resource.secret}, :delete)
-  user_databag(delete)
+  user_databag(:delete)
   own_data_bag(:delete)
 end
 
@@ -106,6 +106,7 @@ action_class do
     own_data_bag(action)
     new_data = {:id => item}.merge(data)
     chef_data_bag_item item do
+      chef_server new_resource.chef_server_url
       data_bag new_resource.name
       raw_data new_data
       action action
@@ -116,6 +117,7 @@ action_class do
     Chef::Log.warn("Encrypt user data bag of #{new_resource.name} with key #{new_resource.secret}")
     begin
       chef_data_bag_item 'user_data' do
+        chef_server new_resource.chef_server_url
         complete false
         data_bag new_resource.name
         encryption_version Chef::Config[:data_bag_encrypt_version].nil? ? 3 : Chef::Config[:data_bag_encrypt_version]

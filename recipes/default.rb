@@ -4,8 +4,7 @@
 #
 # Copyright:: 2023, The Authors, All Rights Reserved.
 
-chef_data_bag 'public_secret'
-
 infra_userdata node[cookbook_name]['bootstrappeur'] do
+  chef_server_url node['chefserver']['chef_server_url']
   action :install
 end
