@@ -8,7 +8,13 @@ default_action :cycle
 
 property :secret, String, default: UnixCrypt::SHA512.build(SecureRandom.base64(12))
 property :secretname, String, name_property: true
-property :chef_server_url, String, default: Chef::Config[:chef_server_url]
+property :chef_server, Hash, default: {
+                                        chef_server_url: Chef::Config[:chef_server_url],
+                                        options: {
+                                          client_name: Chef::Config[:client_name],
+                                          signing_key_filename: Chef::Config[:signing_key_filename],
+                                        }
+                                      }
 property :userdata, Hash, default: {}
 property :owner, String, default: ''
 
@@ -79,12 +85,6 @@ end
 action_class do
   def secret
     new_resource.secret
-  end
-
-  def chef_server
-    {
-      chef_server_url: Chef::Config[:chef_server_url]
-    }
   end
 
   def infra_secret
