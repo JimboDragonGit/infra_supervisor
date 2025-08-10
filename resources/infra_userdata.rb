@@ -113,7 +113,7 @@ action_class do
     own_data_bag(action)
     new_data = {:id => item}.merge(data)
     chef_data_bag_item item do
-      chef_server new_resource.chef_server_url
+      chef_server chef_server
       data_bag new_resource.name
       raw_data new_data
       action action
@@ -124,7 +124,7 @@ action_class do
     Chef::Log.warn("Encrypt user data bag of #{new_resource.name} with key #{new_resource.secret}")
     begin
       chef_data_bag_item 'user_data' do
-        chef_server new_resource.chef_server_url
+        chef_server chef_server
         complete false
         data_bag new_resource.name
         encryption_version Chef::Config[:data_bag_encrypt_version].nil? ? 3 : Chef::Config[:data_bag_encrypt_version]
