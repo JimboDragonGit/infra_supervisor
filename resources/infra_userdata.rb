@@ -92,7 +92,8 @@ action_class do
   end
 
   def user_raw_data
-    {id: "user_data"}.merge new_resource.userdata
+    data = {id: "user_data"}.merge new_resource.userdata
+    Chef::Config[:chef_server_url].include?('chefzero://localhost:1') ? JSON.pretty_generate(data) : data
   end
 
   def is_updating_secret_itself?
