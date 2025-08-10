@@ -15,4 +15,7 @@ infra_userdata node[cookbook_name]['bootstrappeur'] do
     }
   )
   action :install
+  not_if do
+    Chef::Config['chef_server_url'].include?('chefzero://localhost:1')
+  end
 end
