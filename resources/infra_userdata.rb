@@ -81,6 +81,12 @@ action_class do
     new_resource.secret
   end
 
+  def chef_server
+    {
+      chef_server_url: Chef::Config[:chef_server_url]
+    }
+  end
+
   def infra_secret
     data_bag_item('public_secret', new_resource.secretname)['secret']
   end
