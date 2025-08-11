@@ -1,7 +1,7 @@
 # To learn more about Custom Resources, see https://docs.chef.io/custom_resources/
 require 'unix_crypt'
 require 'securerandom'
-require 'net/http/exceptions'
+require 'net/http'
 
 provides :infra_userdata
 
@@ -33,7 +33,7 @@ load_current_value do |current_context|
     end
 
     current_context.secret = user_public_data['secret']
-  rescue Net::HTTPServerException => e
+  rescue Net::HTTPClientException => e
     Chef::Log.warn("Is a 403 error for user_public_data #{e}")
   rescue e
     puts "Error to fetch data bag user_public_data: #{e.message}"
@@ -50,7 +50,7 @@ load_current_value do |current_context|
     end
 
     current_context.userdata = user_secret_data.reject {|key, value| key.include?('id')}
-  rescue Net::HTTPServerException => e
+  rescue Net::HTTPClientException => e
     Chef::Log.warn("Is a 403 error for user_secret_data? #{e}")
   rescue e
     puts "Error to fetch data bag user_secret_data: #{e.message}"
@@ -180,7 +180,7 @@ action_class do
           Chef::Config['chef_server_url'].include?('chefzero://localhost:1')
         end
       end
-    rescue Net::HTTPServerException => e
+    rescue Net::HTTPClientException => e
       Chef::Log.warn("Is a 403 error? #{e}")
     end
   end
