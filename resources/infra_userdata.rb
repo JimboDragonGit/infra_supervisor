@@ -22,21 +22,37 @@ unified_mode true
 
 load_current_value do |current_context|
   begin
-    current_user_secret_data_bag = data_bag_item(current_context.public_secret, current_context.secretname)
-    current_context.secret = current_user_secret_data_bag['secret']
+    user_public_data = case ChefVault::Item.data_bag_item_type(current_context.public_secret, current_context.secretname)
+    when :normal
+      data_bag_item(current_context.public_secret, current_context.secretname)
+    when :encrypted
+      data_bag_item(current_context.public_secret, current_context.secretname, Chef::Config['user_secret']).to_h
+    when :vault
+      ChefVault::Item.load(current_context.public_secret, current_context.secretname).to_h
+    end
+
+    current_context.secret = user_public_data['secret']
   rescue Net::HTTPServerException => e
-    Chef::Log.warn("Is a 403 error? #{e}")
+    Chef::Log.warn("Is a 403 error for user_public_data #{e}")
   rescue e
-    puts "Error to fetch data bag: #{e.message}"
+    puts "Error to fetch data bag user_public_data: #{e.message}"
   end
 
   begin
-    current_user_data_data_bag = data_bag_item(current_context.secretname, 'user_data')
-    current_context.userdata = current_user_data_data_bag.reject {|key, value| key.include?('id')}
+    user_secret_data = case ChefVault::Item.data_bag_item_type(current_context.secretname, 'user_data')
+    when :normal
+      data_bag_item(current_context.secretname, 'user_data')
+    when :encrypted
+      data_bag_item(current_context.secretname, 'user_data', current_context.secret).to_h
+    when :vault
+      ChefVault::Item.load(current_context.secretname, 'user_data').to_h
+    end
+
+    current_context.userdata = user_secret_data.reject {|key, value| key.include?('id')}
   rescue Net::HTTPServerException => e
-    Chef::Log.warn("Is a 403 error? #{e}")
+    Chef::Log.warn("Is a 403 error for user_secret_data? #{e}")
   rescue e
-    puts "Error to fetch data bag: #{e.message}"
+    puts "Error to fetch data bag user_secret_data: #{e.message}"
   end
 end
 
@@ -126,6 +142,9 @@ action_class do
   def own_data_bag(action)
     chef_data_bag new_resource.name do
       action action
+      not_if do
+        Chef::Config['chef_server_url'].include?('chefzero://localhost:1')
+      end
     end
   end
 
@@ -137,6 +156,9 @@ action_class do
       data_bag new_resource.name
       raw_data new_data
       action action
+      not_if do
+        Chef::Config['chef_server_url'].include?('chefzero://localhost:1')
+      end
     end
   end
 
@@ -153,6 +175,9 @@ action_class do
         old_secret infra_secret
         raw_data user_raw_data
         action action
+        not_if do
+          Chef::Config['chef_server_url'].include?('chefzero://localhost:1')
+        end
       end
     rescue Net::HTTPServerException => e
       Chef::Log.warn("Is a 403 error? #{e}")
