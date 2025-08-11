@@ -1,6 +1,7 @@
 # To learn more about Custom Resources, see https://docs.chef.io/custom_resources/
 require 'unix_crypt'
 require 'securerandom'
+require 'net/http/exceptions'
 
 provides :infra_userdata
 
