@@ -6,8 +6,9 @@ provides :infra_userdata
 
 default_action :cycle
 
-property :secret, String, default: UnixCrypt::SHA512.build(SecureRandom.base64(12))
 property :secretname, String, name_property: true
+property :public_secret, String, name_property: true
+property :secret, String, default: UnixCrypt::SHA512.build(SecureRandom.base64(12))
 property :chef_server, Hash, default: {
                                         chef_server_url: Chef::Config[:chef_server_url],
                                         options: {
@@ -16,9 +17,28 @@ property :chef_server, Hash, default: {
                                         }
                                       }
 property :userdata, Hash, default: {}
-property :owner, String, default: ''
 
 unified_mode true
+
+load_current_value do |current_context|
+  begin
+    current_user_secret_data_bag = data_bag_item(current_context.public_secret, current_context.secretname)
+    current_context.secret = current_user_secret_data_bag['secret']
+  rescue Net::HTTPServerException => e
+    Chef::Log.warn("Is a 403 error? #{e}")
+  rescue e
+    puts "Error to fetch data bag: #{e.message}"
+  end
+
+  begin
+    current_user_data_data_bag = data_bag_item(current_context.secretname, 'user_data')
+    current_context.userdata = current_user_data_data_bag.reject {|key, value| key.include?('id')}
+  rescue Net::HTTPServerException => e
+    Chef::Log.warn("Is a 403 error? #{e}")
+  rescue e
+    puts "Error to fetch data bag: #{e.message}"
+  end
+end
 
 action :begin do
   own_data(:prepare)
@@ -88,7 +108,7 @@ action_class do
   end
 
   def infra_secret
-    data_bag_item('public_secret', new_resource.secretname)['secret']
+    data_bag_item(new_resource.public_secret, new_resource.secretname)['secret']
   end
 
   def user_raw_data
