@@ -35,8 +35,9 @@ load_current_value do |current_context|
     current_context.secret = user_public_data['secret']
   rescue Net::HTTPClientException => e
     Chef::Log.warn("Is a 403 error for user_public_data #{e}")
-  rescue e
-    puts "Error to fetch data bag user_public_data: #{e.message}"
+  rescue => e
+    Chef::Log.warn "Error to fetch data bag user_secret_data: #{e.class}"
+    Chef::Log.warn "Error to fetch data bag user_secret_data: #{e.message}"
   end
 
   begin
@@ -50,7 +51,9 @@ load_current_value do |current_context|
     end
 
     current_context.userdata = user_secret_data.reject {|key, value| key.include?('id')}
-  rescue e
+  rescue Net::HTTPClientException => e
+    Chef::Log.warn("Is a 403 error for user_secret_data #{e}")
+  rescue => e
     Chef::Log.warn "Error to fetch data bag user_secret_data: #{e.class}"
     Chef::Log.warn "Error to fetch data bag user_secret_data: #{e.message}"
   end
