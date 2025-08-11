@@ -51,8 +51,8 @@ load_current_value do |current_context|
 
     current_context.userdata = user_secret_data.reject {|key, value| key.include?('id')}
   rescue e
-    puts "Error to fetch data bag user_secret_data: #{e.class}"
-    puts "Error to fetch data bag user_secret_data: #{e.message}"
+    Chef::Log.warn "Error to fetch data bag user_secret_data: #{e.class}"
+    Chef::Log.warn "Error to fetch data bag user_secret_data: #{e.message}"
   end
 end
 
