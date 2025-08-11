@@ -50,9 +50,8 @@ load_current_value do |current_context|
     end
 
     current_context.userdata = user_secret_data.reject {|key, value| key.include?('id')}
-  rescue Net::HTTPClientException => e
-    Chef::Log.warn("Is a 403 error for user_secret_data? #{e}")
   rescue e
+    puts "Error to fetch data bag user_secret_data: #{e.class}"
     puts "Error to fetch data bag user_secret_data: #{e.message}"
   end
 end
