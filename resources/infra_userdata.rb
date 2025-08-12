@@ -157,6 +157,8 @@ action_class do
     chef_data_bag_item item do
       chef_server chef_server
       data_bag new_resource.name
+      encryption_version Chef::Config[:data_bag_encrypt_version].nil? ? 3 : Chef::Config[:data_bag_encrypt_version]
+      secret new_resource.secret
       raw_data new_data
       action action
       not_if do
