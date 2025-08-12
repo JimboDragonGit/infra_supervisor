@@ -36,8 +36,8 @@ load_current_value do |current_context|
   rescue Net::HTTPClientException => e
     Chef::Log.warn("Is a 403 error for user_public_data #{e}")
   rescue => e
-    Chef::Log.warn "Error to fetch data bag user_secret_data: #{e.class}"
-    Chef::Log.warn "Error to fetch data bag user_secret_data: #{e.message}"
+    Chef::Log.warn "Error to fetch data bag user_public_data: #{e.class}"
+    Chef::Log.warn "Error to fetch data bag user_public_data: #{e.message}"
   end
 
   begin
@@ -159,6 +159,7 @@ action_class do
       data_bag new_resource.name
       encryption_version Chef::Config[:data_bag_encrypt_version].nil? ? 3 : Chef::Config[:data_bag_encrypt_version]
       secret new_resource.secret
+      encrypt true
       raw_data new_data
       action action
       not_if do
