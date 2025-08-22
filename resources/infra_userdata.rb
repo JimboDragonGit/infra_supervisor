@@ -8,7 +8,7 @@ provides :infra_userdata
 default_action :cycle
 
 property :secretname, String, name_property: true
-property :public_secret, String, name_property: true
+property :public_secret, String, default: 'public_secret'
 property :secret, String, default: UnixCrypt::SHA512.build(SecureRandom.base64(12))
 property :chef_server, Hash, default: {
                                         chef_server_url: Chef::Config[:chef_server_url],
