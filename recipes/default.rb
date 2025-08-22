@@ -4,7 +4,7 @@
 #
 # Copyright:: 2023, The Authors, All Rights Reserved.
 
-infra_userdata node[cookbook_name]['bootstrapper']['name'] do
+infra_userdata node['chefserver']['bootstrapper']['name'] do
   chef_server(
     {
       chef_server_url: node['chefserver']['chef_server_url'],
