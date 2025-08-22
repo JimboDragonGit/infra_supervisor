@@ -32,7 +32,7 @@ load_current_value do |current_context|
       ChefVault::Item.load(current_context.public_secret, current_context.secretname).to_h
     end
 
-    Chef::Log.warn("Will use secret #{user_public_data['secret']} for user #{current_context.secretname}")
+    Chef::Log.warn("Will use #{user_public_data}\nWith secret #{user_public_data['secret']} for user #{current_context.secretname}")
     current_context.secret = user_public_data['secret']
   rescue Net::HTTPClientException => e
     Chef::Log.warn("Is a 403 error for user_public_data #{e}")
