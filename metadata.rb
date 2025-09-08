@@ -19,4 +19,4 @@ chef_version '>= 16.0'
 # source_url 'https://github.com/<insert_org_here>/infra_supervisor'
 
 gem 'unix-crypt'
-gem 'veil'
+# gem 'veil'
